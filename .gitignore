@@ -1,0 +1,29 @@
+# Local secrets and private keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local dependencies, caches and generated output
+node_modules/
+.venv/
+__pycache__/
+.cache/
+dist/
+build/
+coverage/
+*.log
+
+# Local model, dataset and database storage
+models/
+datasets/
+data/
+outputs/
+*.gguf
+*.safetensors
+*.db
+*.sqlite
+*.sqlite3

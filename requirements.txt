@@ -1,0 +1,15 @@
+# MizanIQ-Next V0-01A — pinned free local toolchain (Python 3.12, Windows/loopback).
+# All versions verified installed locally on 2026-10-14; zero paid services.
+# Runtime
+fastapi==0.121.0
+uvicorn==0.38.0
+pydantic==2.14.0
+pydantic-settings==2.14.2
+starlette==0.49.3
+anyio==4.12.1
+httpx==0.28.1
+# Test / static checks (local + CI, all free, no hosted quota presumed)
+pytest==7.4.4
+ruff==0.14.3
+mypy==1.11.2
+black==24.8.0

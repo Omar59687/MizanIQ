@@ -27,3 +27,11 @@ outputs/
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated V0-01A CI evidence (uploaded as Actions artifacts, never committed)
+evidence/ci-evidence.json
+evidence/junit.xml
+evidence/*.tmp
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

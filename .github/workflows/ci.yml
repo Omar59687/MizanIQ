@@ -1,0 +1,41 @@
+# V0-01A genuine PR gate: no continue-on-error, no swallowed exit codes.
+#
+# Trusted-base handling: fetch-depth 0 alone does not guarantee a fresh main,
+# so the workflow explicitly fetches origin/main and the gate resolves the
+# trusted inventory base through local Git objects (--trust-ref origin/main).
+# Pull requests are gated only when targeting main; pushes only on the V0-01A
+# branch. Any other event context has no gate and therefore no green signal.
+name: ci
+
+on:
+  push:
+    branches: ["phase/v0-01a-foundation-ci"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  v0-01a-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch trusted main base
+        run: git fetch --no-tags --prune origin main:refs/remotes/origin/main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned toolchain
+        run: pip install -r requirements.txt
+      - name: Run genuine V0-01A gate
+        run: python scripts/check.py --min-tests 12 --trust-ref origin/main
+      - name: Verify fresh evidence artifact
+        run: python scripts/check.py --verify-only --min-tests 12 --trust-ref origin/main
+      - name: Upload evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0-01a-evidence
+          path: |
+            evidence/ci-evidence.json
+            evidence/junit.xml

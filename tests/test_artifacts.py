@@ -40,8 +40,14 @@ def test_workflow_uploads_evidence_as_artifacts() -> None:
 def test_workflow_resolves_trusted_main_base() -> None:
     workflow = REPO_ROOT / ".github" / "workflows" / "ci.yml"
     text = workflow.read_text(encoding="utf-8")
-    # fetch-depth alone is insufficient: main must be fetched explicitly.
-    assert "git fetch" in text and "origin main" in text
+    # fetch-depth alone is insufficient: main must be fetched explicitly via
+    # exact forced refspec (no --prune which can delete/alter trusted refs).
+    assert "git fetch" in text
+    assert "+refs/heads/main:refs/remotes/origin/main" in text
+    assert "git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main" in text
+    fetch_lines = [line for line in text.splitlines() if "git fetch" in line]
+    assert fetch_lines
+    assert all("--prune" not in line for line in fetch_lines)
     # Both gate invocations resolve trust through Git objects, never through
     # a candidate-supplied SHA or approval flag.
     assert text.count("--trust-ref origin/main") >= 2

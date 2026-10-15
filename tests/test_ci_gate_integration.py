@@ -391,10 +391,16 @@ def test_trust_bootstrap_exact_initial_pending_review(tmp_path: Path) -> None:
     assert problems == []
     # Production pinning is exact and honest: only e5af075 bootstraps.
     assert check.INITIAL_MAIN_SHA == "e5af075fb4e741936354c083ee1a7e9b1a5359df"
+    # Historical scenario: the exact original initial commit carries no
+    # inventory, so the full proposed set bootstraps as pending review.
+    hist_status, hist_problems, _ = check.check_trusted_inventory(REPO_ROOT, check.INITIAL_MAIN_SHA)
+    assert hist_status == "BOOTSTRAP_PENDING_INDEPENDENT_REVIEW"
+    assert hist_problems == []
+    # Current trusted origin/main has merged the inventory, so it is trusted-clean.
     prod_sha, prod_err = check.resolve_trust_ref(REPO_ROOT, "origin/main")
-    assert prod_err is None and prod_sha == check.INITIAL_MAIN_SHA
+    assert prod_err is None and prod_sha is not None
     prod_status, prod_problems, _ = check.check_trusted_inventory(REPO_ROOT, prod_sha)
-    assert prod_status == "BOOTSTRAP_PENDING_INDEPENDENT_REVIEW"
+    assert prod_status == "trusted-clean"
     assert prod_problems == []
 
 
@@ -587,11 +593,15 @@ def test_bootstrap_proposed_matches_mandatory_inventory() -> None:
     assert sorted(inv_cases) == sorted(check.PROPOSED_INITIAL_CASES)
     assert set(inv_suites) == set(check.PROPOSED_INITIAL_SUITES)
     assert sorted(inv_suites) == sorted(check.PROPOSED_INITIAL_SUITES)
-    # Live bootstrap still offers the exact set as pending review, not approval.
+    # Historical bootstrap still offers the exact set as pending review, not approval.
+    hist_status, hist_problems, _ = check.check_trusted_inventory(REPO_ROOT, check.INITIAL_MAIN_SHA)
+    assert hist_status == "BOOTSTRAP_PENDING_INDEPENDENT_REVIEW"
+    assert hist_problems == []
+    # Current trusted origin/main has merged the inventory, so it is trusted-clean.
     prod_sha, prod_err = check.resolve_trust_ref(REPO_ROOT, "origin/main")
     assert prod_err is None and prod_sha is not None
     prod_status, prod_problems, _ = check.check_trusted_inventory(REPO_ROOT, prod_sha)
-    assert prod_status == "BOOTSTRAP_PENDING_INDEPENDENT_REVIEW"
+    assert prod_status == "trusted-clean"
     assert prod_problems == []
 
 
